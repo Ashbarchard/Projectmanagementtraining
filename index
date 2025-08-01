@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Project Management Visualizer</title>
+
+    <!-- Tailwind CSS for a modern look and easy styling -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome for a wide range of icons -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <style>
+
+        /* Import a clean, modern font */
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+        body {
+
+            font-family: 'Inter', sans-serif;
+
+            background-color: #f8fafc; /* A light, clean background color */
+
+        }
+
+        .flow-container {
+
+            position: relative;
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid for all screen sizes */
+
+            gap: 2rem;
+
+            max-width: 1200px;
+
+            margin: auto;
+
+            padding: 2rem;
+
+        }
+
+        .flow-item {
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            text-align: center;
+
+            cursor: pointer;
+
+            transition: transform 0.2s, box-shadow 0.2s; /* Smooth transition for hover effects */
+
+            border-radius: 1rem;
+
+            padding: 2rem;
+
+            min-height: 200px;
+
+        }
+
+        .flow-item:hover {
+
+            transform: translateY(-5px); /* Lift the card slightly on hover */
+
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); /* More pronounced shadow on hover */
+
+        }
+
+        .flow-item .icon-box {
+
+            background-color: white;
+
+            border-radius: 9999px;
+
+            width: 90px;
+
+            height: 90px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-bottom: 1rem;
+
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+            transition: background-color 0.2s;
+
+        }
+
+        .flow-item:hover .icon-box {
+
+            background-color: #e2e8f0; /* Subtle color change on icon box hover */
+
+        }
+
+        .flow-item h3 {
+
+            font-size: 1.25rem;
+
+            font-weight: 600;
+
+            color: #1a202c;
+
+            margin-top: 1rem;
+
+        }
+
+        .modal {
+
+            display: none;
+
+            position: fixed;
+
+            z-index: 100;
+
+            left: 0;
+
+            top: 0;
+
+            width: 100%;
+
+            height: 100%;
+
+            overflow: auto;
+
+            background-color: rgba(0, 0, 0, 0.6); /* Darker overlay for better focus */
+
+            backdrop-filter: blur(8px);
+
+            -webkit-backdrop-filter: blur(8px);
+
+            justify-content: center;
+
+            align-items: center;
+
+            padding: 1rem;
+
+        }
+
+        .modal-content {
+
+            background-color: #ffffff;
+
+            padding: 2.5rem;
+
+            border-radius: 1.5rem;
+
+            max-width: 700px;
+
+            width: 100%;
+
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+
+            position: relative;
+
+            transform: scale(0.9);
+
+            opacity: 0;
+
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+
+        }
+
+        .modal.show .modal-content {
+
+            transform: scale(1);
+
+            opacity: 1;
+
+        }
+
+        .close-btn {
+
+            color: #64748b;
+
+            position: absolute;
+
+            top: 1.5rem;
+
+            right: 1.5rem;
+
+            font-size: 2rem;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: color 0.2s;
+
+        }
+
+        .close-btn:hover {
+
+            color: #1a202c;
+
+        }
+
+        .modal-title {
+
+            font-size: 2.25rem;
+
+            font-weight: 700;
+
+            color: #1e3a8a;
+
+            margin-bottom: 1rem;
+
+        }
+
+        .modal-focus {
+
+            font-size: 1.125rem;
+
+            color: #4b5563;
+
+            margin-bottom: 1.5rem;
+
+        }
+
+        .modal-checklist li {
+
+            background-color: #f1f5f9;
+
+            padding: 0.75rem 1.25rem;
+
+            border-radius: 0.75rem;
+
+            display: flex;
+
+            align-items: center;
+
+            transition: background-color 0.2s;
+
+        }
+
+        .modal-checklist li:hover {
+
+            background-color: #e2e8f0;
+
+        }
+
+        .modal-checklist .fa-regular {
+
+            color: #3b82f6;
+
+        }
+
+    </style>
+
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+
+
+    <div class="container mx-auto p-8 lg:p-12">
+
+        <h1 class="text-4xl lg:text-5xl font-extrabold text-center mb-4 text-gray-900">Project Management Process</h1>
+
+        <p class="text-center text-xl mb-12 text-gray-600 max-w-2xl mx-auto">
+
+            Click on each step of the project lifecycle to learn more about its purpose and key tasks.
+
+        </p>
+
+
+
+        <div class="flow-container">
+
+            <!-- Project Flow Items -->
+
+            <div id="step-1" class="flow-item bg-blue-50 hover:bg-blue-100 shadow-lg" data-step-id="1">
+
+                <div class="icon-box"><i class="fa-solid fa-bullseye fa-3x text-blue-500"></i></div>
+
+                <h3 class="text-blue-700">1. Define Purpose</h3>
+
+            </div>
+
+            <div id="step-2" class="flow-item bg-green-50 hover:bg-green-100 shadow-lg" data-step-id="2">
+
+                <div class="icon-box"><i class="fa-solid fa-ruler fa-3x text-green-500"></i></div>
+
+                <h3 class="text-green-700">2. Scope Work</h3>
+
+            </div>
+
+            <div id="step-3" class="flow-item bg-yellow-50 hover:bg-yellow-100 shadow-lg" data-step-id="3">
+
+                <div class="icon-box"><i class="fa-solid fa-users fa-3x text-yellow-500"></i></div>
+
+                <h3 class="text-yellow-700">3. Identify People</h3>
+
+            </div>
+
+            <div id="step-4" class="flow-item bg-purple-50 hover:bg-purple-100 shadow-lg" data-step-id="4">
+
+                <div class="icon-box"><i class="fa-solid fa-lightbulb fa-3x text-purple-500"></i></div>
+
+                <h3 class="text-purple-700">4. Set Vision & Goals</h3>
+
+            </div>
+
+            <div id="step-5" class="flow-item bg-orange-50 hover:bg-orange-100 shadow-lg" data-step-id="5">
+
+                <div class="icon-box"><i class="fa-solid fa-handshake fa-3x text-orange-500"></i></div>
+
+                <h3 class="text-orange-700">5. Engage Stakeholders</h3>
+
+            </div>
+
+            <div id="step-6" class="flow-item bg-red-50 hover:bg-red-100 shadow-lg" data-step-id="6">
+
+                <div class="icon-box"><i class="fa-solid fa-rocket fa-3x text-red-500"></i></div>
+
+                <h3 class="text-red-700">6. Kick-off Session</h3>
+
+            </div>
+
+            <div id="step-7" class="flow-item bg-cyan-50 hover:bg-cyan-100 shadow-lg" data-step-id="7">
+
+                <div class="icon-box"><i class="fa-solid fa-user-plus fa-3x text-cyan-500"></i></div>
+
+                <h3 class="text-cyan-700">7. Get People On Board</h3>
+
+            </div>
+
+            <div id="step-8" class="flow-item bg-gray-100 hover:bg-gray-200 shadow-lg" data-step-id="8">
+
+                <div class="icon-box"><i class="fa-solid fa-chart-line fa-3x text-gray-500"></i></div>
+
+                <h3 class="text-gray-700">8. Keep it Moving</h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- The Modal -->
+
+    <div id="stepModal" class="modal">
+
+        <div class="modal-content">
+
+            <span class="close-btn">&times;</span>
+
+            <h2 id="modal-title" class="modal-title"></h2>
+
+            <p id="modal-focus" class="modal-focus"></p>
+
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Checklist</h3>
+
+            <ul id="modal-checklist" class="list-none space-y-4">
+
+                <!-- Checklist items will be populated here -->
+
+            </ul>
+
+        </div>
+
+    </div>
+
+
+
+    <script>
+
+        // Data for each project step
+
+        const projectSteps = {
+
+            1: {
+
+                title: "1. Define the Purpose",
+
+                focus: "Understanding the definition, purpose, and value of project management.",
+
+                checklist: [
+
+                    "Write a 1-2 sentence purpose for the project",
+
+                    "Identify the problem this project is solving",
+
+                    "Describe what success looks like"
+
+                ]
+
+            },
+
+            2: {
+
+                title: "2. Scope the Work",
+
+                focus: "Knowing what to do first: defining the purpose, scoping work, and identifying stakeholders.",
+
+                checklist: [
+
+                    "List what's in scope (what you will deliver)",
+
+                    "List what's out of scope (what's not included)",
+
+                    "Break the project into key tasks or phases",
+
+                    "Set a deadline or timeline for each key phase"
+
+                ]
+
+            },
+
+            3: {
+
+                title: "3. Identify Key People (RACI-style)",
+
+                focus: "Understanding project roles: Project Lead, Contributors, Stakeholders, Sponsors.",
+
+                checklist: [
+
+                    "Assign a Project Lead (probably you!)",
+
+                    "Confirm the Sponsor (who approves/supports it)",
+
+                    "List your Contributors (people helping deliver tasks)",
+
+                    "Identify Stakeholders (those impacted or interested)"
+
+                ]
+
+            },
+
+            4: {
+
+                title: "4. Set the Vision & Goals",
+
+                focus: "How to create alignment and buy-in from the outset.",
+
+                checklist: [
+
+                    "Write a simple project vision (what change you want to create)",
+
+                    "Set clear, measurable goals or outcomes",
+
+                    "Share these in a kickoff or planning session"
+
+                ]
+
+            },
+
+            5: {
+
+                title: "5. Engage Stakeholders",
+
+                focus: "Who they are, why they matter, and how to manage their involvement.",
+
+                checklist: [
+
+                    "Make a list of key stakeholders",
+
+                    "Ask: what do they care about?",
+
+                    "Plan how and when you'll update or involve them"
+
+                ]
+
+            },
+
+            6: {
+
+                title: "6. Run a Kick-off Session",
+
+                focus: "Structuring and leading a powerful, inclusive project start.",
+
+                checklist: [
+
+                    "Set a date and invite the right people",
+
+                    "Prepare a simple agenda (purpose, scope, people, timeline)",
+
+                    "Make space for input and questions",
+
+                    "Align on next steps and responsibilities"
+
+                ]
+
+            },
+
+            7: {
+
+                title: "7. Get People On Board",
+
+                focus: "Influence strategies, motivation, and engagement techniques.",
+
+                checklist: [
+
+                    "Share the 'why' in a way that excites others",
+
+                    "Give people clear roles/tasks",
+
+                    "Celebrate early wins and progress"
+
+                ]
+
+            },
+
+            8: {
+
+                title: "8. Keep it Moving",
+
+                focus: "Staying on track and managing the project's progress effectively.",
+
+                checklist: [
+
+                    "Track progress (Kanban board, checklist, spreadsheet)",
+
+                    "Check in regularly with contributors",
+
+                    "Flag blockers early",
+
+                    "Keep communication clear and consistent"
+
+                ]
+
+            }
+
+        };
+
+
+
+        // Get modal elements
+
+        const modal = document.getElementById("stepModal");
+
+        const modalTitle = document.getElementById("modal-title");
+
+        const modalFocus = document.getElementById("modal-focus");
+
+        const modalChecklist = document.getElementById("modal-checklist");
+
+        const closeBtn = document.querySelector(".close-btn");
+
+
+
+        // Event listener for each flow item
+
+        document.querySelectorAll(".flow-item").forEach(item => {
+
+            item.addEventListener("click", () => {
+
+                const stepId = item.getAttribute("data-step-id");
+
+                const stepData = projectSteps[stepId];
+
+
+
+                // Populate modal with content
+
+                modalTitle.textContent = stepData.title;
+
+                modalFocus.textContent = stepData.focus;
+
+                modalChecklist.innerHTML = ''; // Clear previous checklist items
+
+                stepData.checklist.forEach(task => {
+
+                    const li = document.createElement("li");
+
+                    li.innerHTML = `<i class="fa-regular fa-square fa-lg text-blue-500 mr-4"></i><span>${task}</span>`;
+
+                    li.className = "flex items-start";
+
+                    modalChecklist.appendChild(li);
+
+                });
+
+
+
+                // Display the modal with animation
+
+                modal.style.display = "flex";
+
+                setTimeout(() => modal.classList.add("show"), 10);
+
+            });
+
+        });
+
+
+
+        // Close modal when close button is clicked
+
+        closeBtn.addEventListener("click", () => {
+
+            modal.classList.remove("show");
+
+            setTimeout(() => modal.style.display = "none", 300);
+
+        });
+
+
+
+        // Close modal when clicking outside of it
+
+        window.addEventListener("click", (event) => {
+
+            if (event.target === modal) {
+
+                modal.classList.remove("show");
+
+                setTimeout(() => modal.style.display = "none", 300);
+
+            }
+
+        });
+
+    </script>
+
+</body>
+
+</html>
